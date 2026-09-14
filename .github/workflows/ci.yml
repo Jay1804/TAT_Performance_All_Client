@@ -1,0 +1,29 @@
+name: CI
+
+# Deployment itself is handled by Streamlit Community Cloud, which watches
+# this repo's main branch and redeploys automatically on every push - there
+# is no separate deploy job here. This workflow is the CI gate that runs
+# before that: it fails fast on a broken dependency set or a syntax error
+# so those never reach the branch Streamlit Cloud deploys from.
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Byte-compile (syntax check)
+        run: python -m compileall -q .
